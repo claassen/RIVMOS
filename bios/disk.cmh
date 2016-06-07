@@ -1,0 +1,12 @@
+#define FAT_TABLE_START 524
+
+typedef FAT_FILE_ENTRY 
+{
+	byte[8] FileName;
+	int StartSector;
+	int Size;
+}
+
+void diskread_raw(byte* buffer, int address, int count, int offset);
+void read_file(byte* buffer, byte* fileName);
+int get_file_size(byte* fileName);

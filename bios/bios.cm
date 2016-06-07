@@ -1,0 +1,33 @@
+#include "..\rivm\memory_map.cmh"
+#include "..\rivm\interrupts.cmh"
+#include "graphics.cmh"
+#include "disk.cmh"
+#include "ir_handlers.cmh"
+
+//Set up stack
+asm {"
+    mov bp <- BIOS_STACK_START 
+    mov sp <- BIOS_STACK_START 
+"}
+
+vga_init();
+
+print("BIOS Starting...\n\n");
+
+print("Setting up IVT...\n");
+
+setup_ivt();
+install_ir_handler(INT_BIOS_PRINT, ir_print);
+install_ir_handler(INT_BIOS_DISKREAD, ir_read_file);
+
+print("Copying bootloader...\n");
+
+diskread_raw((byte*)BOOT_SECTOR_START, 0, 512, 0);
+
+print("Starting bootloader...\n");
+
+asm {"
+	jmp BOOT_SECTOR_START
+"}
+
+

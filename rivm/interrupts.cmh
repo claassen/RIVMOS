@@ -1,0 +1,5 @@
+#define INT_DIV_ZERO      0
+#define INT_PROT_FAULT 	  1
+#define INT_PAGE_FAULT 	  2
+#define INT_BIOS_PRINT    3
+#define INT_BIOS_DISKREAD 4

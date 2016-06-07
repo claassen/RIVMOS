@@ -1,0 +1,26 @@
+#include "..\rivm\memory_map.cmh"
+#include "..\rivm\interrupts.cmh"
+
+void bootLoader();
+
+asm {"
+	mov bp <- sp
+	call &bootLoader
+"}
+
+void bootLoader() {
+	byte[8] kernelImage = "ker.sys";
+
+	//Call BIOS file read interrupt routine
+	//  eax = file name
+	//  ebx = buffer to read file to
+	asm {"
+		load eax <- [bp + &kernelImage]
+		mov ebx <- RAM_START
+		int INT_BIOS_DISKREAD
+	"}
+
+	asm {"
+		jmp RAM_START
+	"}
+}

@@ -1,0 +1,26 @@
+#include "stdlib.cmh"
+
+export bool strcmp(byte* s1, byte* s2)
+{
+    bool done = false;
+	bool match = true;
+	
+	for(int i = 0; done == false; i = i + 1)
+	{	
+		byte c1 = *(s1 + i);
+		byte c2 = *(s2 + i);
+		
+		if(c1 == (byte)0 || c2 == (byte)0)
+		{
+			done = true;
+		}
+		
+		if(c1 != c2)
+		{
+			match = false;
+			done = true;
+		}
+	}
+	
+	return match;
+}

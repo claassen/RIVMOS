@@ -1,0 +1,45 @@
+#include "..\rivm\memory_map.cmh"
+#include "..\cmlib\stdlib.cmh"
+#include "graphics.cmh"
+
+#define CURSOR *((int*)(BIOS_STACK_END - 4))
+
+export void vga_init()
+{
+	CURSOR = VGA_MEMORY_START;
+}
+
+export void print(byte* s)
+{
+	bool done = false;
+	int col = CURSOR;
+	int currentRow = 0;
+	
+	for(int i = 0; done == false; i = i + 1)
+	{
+		byte c = *(s + i);
+		
+		if((int)c == 0)
+		{
+			done = true;
+		}
+		else if((int)c == 10) //new line
+		{
+			col = col + (80 - currentRow);
+			currentRow = 0;
+		}
+		else
+		{
+			asm {"
+				load BYTE eax <- [bp + &c]
+				load ebx <- [bp + &col]
+				store eax -> ebx
+			"}
+			
+			col = col + 1;
+			currentRow = currentRow + 1;
+		}
+	}
+	
+	CURSOR = col;
+}

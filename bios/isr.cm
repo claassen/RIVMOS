@@ -1,0 +1,113 @@
+#include "..\rivm\memory_map.cmh"
+#include "isr.cmh"
+
+void ir_handler_stub(Registers* regs)
+{
+	((((void)(Registers*)[])(*ISR_START))[regs->int_number])(regs);
+}
+
+asm {"
+	//Common steps for all interrupt calls:
+	//  Save register state, pass register values as struct to interrupt handler routine,
+	//  call interrupt hander routing and restore register state
+	IR_COMMON_STUB:
+		//Save register state
+		push eax
+		push ebx
+		push ecx
+		push edx
+		push bp
+		
+		mov eax <- 28      //offset to start of Registers struct
+		sub sp, eax -> eax //eax = pointer to Registers struct in stack
+		push eax 		   //push pointer to Registers struct as argument to ir_handler_stub
+		mov bp <- sp       //set new base pointer (like compiler would for a function call)
+		
+		call &ir_handler_stub
+		
+		mov eax <- 4
+		sub sp, eax -> sp //reclaim space from int# and arg
+		
+		//Restore register state
+		pop bp
+		pop edx  		 
+		pop ecx
+		pop ebx
+		pop eax
+		
+		//Adjust sp, this means that calling interrupts will clobber eax
+		pop eax
+		pop eax
+		pop eax
+		
+		sti
+		iret
+		
+	ISR0:
+		cli
+		push 0
+		push 0 //arg
+		jmp :IR_COMMON_STUB
+	ISR1:
+		cli
+		push 1
+		push 0 //arg
+		jmp :IR_COMMON_STUB
+	ISR2:
+		cli
+		push 2
+		push 0 //arg
+		jmp :IR_COMMON_STUB
+	ISR3:
+		cli
+		push 3
+		push 0 //arg
+		jmp :IR_COMMON_STUB
+	ISR4:
+		cli
+		push 4
+		push 0 //arg
+		jmp :IR_COMMON_STUB
+		
+	//... 256 available (size of IVT section of ram / 4)
+"}
+
+export void setup_ivt()
+{
+	asm {"
+		mov eax <- :ISR0
+		store eax -> IVT_START
+		
+		mov eax <- :ISR1
+		mov ebx <- IVT_START
+		mov ecx <- 4
+		add ebx, ecx -> edx
+		store eax -> edx
+		
+		mov eax <- :ISR2
+		mov ebx <- IVT_START
+		mov ecx <- 8
+		add ebx, ecx -> edx
+		store eax -> edx
+		
+		mov eax <- :ISR3
+		mov ebx <- IVT_START
+		mov ecx <- 12
+		add ebx, ecx -> edx
+		store eax -> edx
+		
+		mov eax <- :ISR4
+		mov ebx <- IVT_START
+		mov ecx <- 16
+		add ebx, ecx -> edx
+		store eax -> edx
+		
+		//... 256 available (size of IVT section of ram / 4)
+	"}
+}
+
+export void install_ir_handler(int interrupt, (void)(Registers*) handler)
+{
+	(((void)(Registers*)[])(*ISR_START))[interrupt] = handler;
+}
+

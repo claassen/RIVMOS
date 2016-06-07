@@ -1,0 +1,103 @@
+#include "..\rivm\memory_map.cmh"
+#include "..\rivm\io_ports.cmh"
+#include "..\cmlib\stdlib.cmh"
+#include "disk.cmh"
+
+export void diskread_raw(byte* buffer, int address, int count, int offset)
+{
+	//so we can reference in asm
+	byte* buf = buffer;
+    int seekAddress = address; 
+	int bufferOffset = offset;
+
+    asm {"
+        load eax <- [bp + &seekAddress]
+        store eax -> IO_PORT_DISK_ADDRESS //address = 0
+        mov eax <- 0
+        store eax -> IO_PORT_DISK_CONTROL //seek
+        
+        mov eax <- 1 //byte count
+        store eax -> IO_PORT_DISK_COUNT
+    "}
+    
+    for(int i = 0; i < count; i = i + 1)
+    {
+        asm {"
+            mov eax <- 1       //read
+            store eax -> IO_PORT_DISK_CONTROL
+            
+            load ebx <- [bp + &i]     //ebx = i
+            
+			//mov eax <- 8           
+            //sub bp, eax -> eax  //eax = buffer[0]
+            //load eax <- eax     //eax = &buffer[0]
+			load eax <- [bp + &buf]   //eax = buf
+			
+            add eax, ebx -> eax //eax = &buffer[i]
+            
+			load ebx <- [bp + &bufferOffset] //ebx = offset
+			add eax, ebx -> eax				 //eax = buffer[i + offset]
+			
+            load ecx <- IO_PORT_DISK_DATA    //data -> ecx
+            store BYTE ecx -> eax			 //ecx -> buffer[i + offset]
+        "}
+    }
+}
+
+export void read_file(byte* buffer, byte* fileName)
+{
+	int numSectors;
+	int numFiles;
+	int dataStart;
+	
+	diskread_raw((byte*)&numSectors, 512, 4, 0);
+	diskread_raw((byte*)&numFiles, 516, 4, 0);
+	diskread_raw((byte*)&dataStart, 520, 4, 0);
+	
+	int rootDirStart = 524 + numSectors * 4;
+	
+	int sector;
+	
+	FAT_FILE_ENTRY entry;
+	bool match = false;
+	bool foundFile = false;
+	
+	for(int i = 0; i < numFiles; i = i + 1)
+	{	
+		diskread_raw((byte*)&entry, rootDirStart + i * 16, 16, 0);
+		
+		match = strcmp(fileName, &entry.FileName);
+		
+		if(match)
+		{
+			foundFile = true;
+			sector = entry.StartSector;
+		}
+	}
+	
+	if(foundFile) {
+	
+		int offset = 0;
+		
+		for(int done = 0; done == 0; done = done + 0)
+		{
+			diskread_raw(buffer, dataStart + sector * 512, 512, offset);
+			
+			offset = offset + 512;
+		
+			diskread_raw((byte*)&sector, 524 + sector, 4, 0);
+			
+			if(sector == 0)
+			{
+				done = 1;
+			}
+		}
+	}
+}
+
+export int get_file_size(byte* fileName)
+{
+	//TODO
+	
+	return 0;
+}

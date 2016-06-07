@@ -1,0 +1,18 @@
+#include "ir_handlers.cmh"
+#include "graphics.cmh"
+#include "disk.cmh"
+
+export void ir_print(Registers* regs)
+{
+	byte* message = (byte*)regs->eax;
+	
+	print(message);
+}
+
+export void ir_read_file(Registers* regs)
+{
+	byte* fileName = (byte*)regs->eax;
+	byte* writeAddress = (byte*)regs->ebx;
+	
+	read_file(writeAddress, fileName);
+}

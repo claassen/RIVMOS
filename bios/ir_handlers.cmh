@@ -1,0 +1,4 @@
+#include "isr.cmh"
+
+void ir_print(Registers* regs);
+void ir_read_file(Registers* regs);

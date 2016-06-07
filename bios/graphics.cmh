@@ -1,0 +1,2 @@
+void print(byte* s);
+void vga_init();

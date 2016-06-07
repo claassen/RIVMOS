@@ -1,0 +1,4 @@
+#define false (bool)0
+#define true (bool)1
+
+bool strcmp(byte* s1, byte* s2);

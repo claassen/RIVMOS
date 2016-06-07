@@ -1,0 +1,12 @@
+typedef Registers
+{
+	int int_number;
+	int arg;
+	int eax;
+	int ebx;
+	int ecx;
+	int edx;
+}
+
+void setup_ivt();
+void install_ir_handler(int interrupt, (void)(Registers*) handler);
