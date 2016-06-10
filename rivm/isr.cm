@@ -1,0 +1,7 @@
+#include "memory_map.cmh"
+#include "isr.cmh"
+
+export void install_ir_handler(int interrupt, (void)(Registers*) handler)
+{
+	(((void)(Registers*)[])(*ISR_START))[interrupt] = handler;
+}

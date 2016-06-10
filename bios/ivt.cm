@@ -1,5 +1,6 @@
 #include "..\rivm\memory_map.cmh"
-#include "isr.cmh"
+#include "..\rivm\isr.cmh"
+#include "ivt.cmh"
 
 void ir_handler_stub(Registers* regs)
 {
@@ -9,7 +10,7 @@ void ir_handler_stub(Registers* regs)
 asm {"
 	//Common steps for all interrupt calls:
 	//  Save register state, pass register values as struct to interrupt handler routine,
-	//  call interrupt hander routing and restore register state
+	//  call interrupt hander routine and restore register state
 	IR_COMMON_STUB:
 		//Save register state
 		push eax
@@ -25,8 +26,9 @@ asm {"
 		
 		call &ir_handler_stub
 		
+		//Reclaim space from Registers pointer arg
 		mov eax <- 4
-		sub sp, eax -> sp //reclaim space from int# and arg
+		sub sp, eax -> sp
 		
 		//Restore register state
 		pop bp
@@ -35,8 +37,8 @@ asm {"
 		pop ebx
 		pop eax
 		
-		//Adjust sp, this means that calling interrupts will clobber eax
-		pop eax
+		//Reclaim space from interrupt # and arg pushed in ISR stub
+		//There is no way to do this without using a register so calling interrupts will clobber eax
 		pop eax
 		pop eax
 		
@@ -75,6 +77,8 @@ asm {"
 export void setup_ivt()
 {
 	asm {"
+		setidt IVT_START
+	
 		mov eax <- :ISR0
 		store eax -> IVT_START
 		
@@ -104,10 +108,5 @@ export void setup_ivt()
 		
 		//... 256 available (size of IVT section of ram / 4)
 	"}
-}
-
-export void install_ir_handler(int interrupt, (void)(Registers*) handler)
-{
-	(((void)(Registers*)[])(*ISR_START))[interrupt] = handler;
 }
 

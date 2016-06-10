@@ -1,11 +1,14 @@
+cmc\cmc C:\VM\rivm\isr.cm
+
 cmc\cmc C:\VM\cmlib\stdlib.cm
+
 cmc\cmc C:\VM\bios\disk.cm
 cmc\cmc C:\VM\bios\graphics.cm
-cmc\cmc C:\VM\bios\isr.cm
+cmc\cmc C:\VM\bios\ivt.cm
 cmc\cmc C:\VM\bios\ir_handlers.cm
 cmc\cmc C:\VM\bios\bios.cm
 
-cml\cml -o C:\VM\bios.exe -l 0x000F0000 C:\VM\bios\bios.o C:\VM\bios\ir_handlers.o C:\VM\cmlib\stdlib.o C:\VM\bios\disk.o C:\VM\bios\graphics.o C:\VM\bios\isr.o
+cml\cml -o C:\VM\bios.exe -l 0x000F0000 C:\VM\bios\bios.o C:\VM\rivm\isr.o C:\VM\cmlib\stdlib.o C:\VM\bios\ir_handlers.o C:\VM\bios\disk.o C:\VM\bios\graphics.o C:\VM\bios\ivt.o
 
 cmc\cmc C:\VM\bootloader\bootloader.cm
 

@@ -8,5 +8,4 @@ typedef Registers
 	int edx;
 }
 
-void setup_ivt();
 void install_ir_handler(int interrupt, (void)(Registers*) handler);

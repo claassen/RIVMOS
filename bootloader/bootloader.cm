@@ -4,6 +4,9 @@
 void bootLoader();
 
 asm {"
+	//Enable interrupts
+	sti
+	
 	mov bp <- sp
 	call &bootLoader
 "}

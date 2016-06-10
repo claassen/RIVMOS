@@ -6,9 +6,9 @@
 export void diskread_raw(byte* buffer, int address, int count, int offset)
 {
 	//so we can reference in asm
-	byte* buf = buffer;
+    byte* buf = buffer;
     int seekAddress = address; 
-	int bufferOffset = offset;
+    int bufferOffset = offset;
 
     asm {"
         load eax <- [bp + &seekAddress]
@@ -58,7 +58,7 @@ export void read_file(byte* buffer, byte* fileName)
 	
 	int sector;
 	
-	FAT_FILE_ENTRY entry;
+	FAT_FILE_ENTRY entry; //16
 	bool match = false;
 	bool foundFile = false;
 	
